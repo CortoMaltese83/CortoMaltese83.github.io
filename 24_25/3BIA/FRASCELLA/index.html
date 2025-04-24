@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simulazione Allunaggio </title>
+  <style>
+    body {
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    #gameCanvas {
+      border: 2px solid white;
+      display: block;
+      margin: 20px auto;
+      background: black;
+    }
+    #status {
+      font-size: 20px;
+      margin-top: 10px;
+    }
+	#retryButton {
+      display: none;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #444;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+	 #controls {
+      margin-top: 20px;
+    }
+    .control-button {
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #444;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin: 5px;
+    }
+	#legend {
+  position: absolute;
+  top: 150px;
+  right: 30px;
+  background-color: rgba(255,255,255,0.1);
+  padding: 15px;
+  border: 1px solid white;
+  border-radius: 8px;
+  width: 220px;
+  text-align: left;
+  font-size: 14px;
+}
+#legend h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #0f0;
+}
+
+  </style>
+</head>
+<body>
+  <h1>🚀 Simulazione Allunaggio </h1>
+  <canvas id="gameCanvas" width="700" height="700"></canvas>
+  <div id="legend">
+  <h3>Legenda Comandi</h3>
+  <ul>
+    <li>⬆️ Freccia su = Retro-razzi</li>
+    <li>⬅️ Freccia sinistra / Pulsante = Muovi a sinistra</li>
+    <li>➡️ Freccia destra / Pulsante = Muovi a destra</li>
+    <li>⟳ Pulsante = Ripeti Atterraggio</li>
+  </ul>
+</div>
+
+  <p id="status"></p>
+  <button id="retryButton" onclick="restartGame()">Ripeti Atterraggio</button>
+  
+   <div id="controls">
+    <button class="control-button" id="leftButton">⬅️ Sinistra</button>
+    <button class="control-button" id="rightButton">➡️ Destra</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const gravity = 0.0025;
+    let lander = {
+      x: 230,
+      y: 50,
+      vx: 0,
+      vy: 0,
+      width: 40,
+      height: 40,
+      fuel: 100,
+      thrusting: false,
+      lateralThrust: 0
+    };
+
+    const landingZone = {
+      x: 200,
+      y: 660,
+      width: 100,
+      height: 10
+    };
+
+    let background = new Image();
+    background.src = "moon.jpg";
+
+    let landerImg = new Image();
+    landerImg.src = "lander.jpg";
+
+    let gameOver = false;
+    let keys = {};
+
+	  // Pulsanti di controllo
+    document.getElementById('leftButton').addEventListener('click', () => {
+      moveLeft();
+    });
+
+    document.getElementById('rightButton').addEventListener('click', () => {
+      moveRight();
+    });
+
+    // Funzione di movimento a sinistra
+    function moveLeft() {
+      if (lander.fuel > 0) {
+        lander.vx -= 0.03;
+        lander.fuel -= 0.5;
+      }
+    }
+
+    // Funzione di movimento a destra
+    function moveRight() {
+      if (lander.fuel > 0) {
+        lander.vx += 0.03;
+        lander.fuel -= 0.5;
+      }
+    }
+
+
+    function update() {
+      if (gameOver) return;
+
+      // Forza di gravità
+      lander.vy += gravity;
+
+      // Comandi utente
+      if (keys["ArrowUp"] && lander.fuel > 0) {
+        lander.vy -= 0.005;
+        lander.fuel -= 0.5;
+        lander.thrusting = true;
+      } else {
+        lander.thrusting = false;
+      }
+
+       // Aggiorna posizione
+      lander.x += lander.vx;
+      lander.y += lander.vy;
+
+      // Collisione con la superficie
+      if (lander.y + lander.height >= landingZone.y) {
+        lander.y = landingZone.y - lander.height;
+        checkLanding();
+      }
+    }
+
+    function checkLanding() {
+      gameOver = true;
+      let center = lander.x + lander.width / 2;
+      let speed = Math.sqrt(lander.vx ** 2 + lander.vy ** 2);
+      const status = document.getElementById("status");
+	  const retryButton = document.getElementById("retryButton");
+	  let failureReason = "";
+
+      if (
+        center >= landingZone.x && // **Verifica se il centro della navetta è dentro la zona di atterraggio**
+		center <= landingZone.x + landingZone.width && // **Centro dentro la zona di atterraggio**
+		lander.y + lander.height >= landingZone.y && // **Navetta deve toccare il suolo**
+		Math.abs(lander.vy) < 0.1 && // **Velocità verticale deve essere inferiore a 0.05 (caduta dolce)**
+		Math.abs(lander.vx) < 0.05 // **Velocità orizzontale deve essere inferiore a 0.05 (niente scivolamento)**
+      ) {
+        status.innerText = "✅ Atterraggio perfetto!";
+      } else  {
+        // Determinare la motivazione del fallimento
+        if (lander.y + lander.height > landingZone.y) {
+          failureReason += "💥 Velocità verticale troppo alta! ";
+        }
+        if (center < landingZone.x || center > landingZone.x + landingZone.width) {
+          failureReason += "💥 Fuori dalla zona di atterraggio! ";
+        }
+        if (Math.abs(lander.vx) > 0.05) {
+          failureReason += "💥 Velocità orizzontale troppo alta!";
+        }
+        status.innerText = "💥 Atterraggio fallito: " + failureReason;
+      }
+
+		// Mostra il bottone per ripetere
+      retryButton.style.display = "inline-block";
+    }
+		function restartGame() {
+  lander.x = 330; // o dove vuoi che ricominci
+  lander.y = 50;
+  lander.vx = 0;
+  lander.vy = 0;
+  lander.fuel = 100;
+  lander.thrusting = false;
+  lander.lateralThrust = 0;
+
+  gameOver = false;
+  document.getElementById("retryButton").style.display = "none";
+  document.getElementById("status").innerText = "";
+  startTime = Date.now(); // resetta il tempo
+}
+	
+
+    function draw() {
+      ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+      // Zona di atterraggio
+      ctx.fillStyle = "lime";
+      ctx.fillRect(landingZone.x, landingZone.y, landingZone.width, landingZone.height);
+
+      // Fiamma dei motori
+      if (lander.thrusting) {
+        ctx.fillStyle = "orange";
+        ctx.beginPath();
+        ctx.moveTo(lander.x + lander.width / 2, lander.y + lander.height);
+        ctx.lineTo(lander.x + lander.width / 2 - 5, lander.y + lander.height + 20);
+        ctx.lineTo(lander.x + lander.width / 2 + 5, lander.y + lander.height + 20);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // Navetta
+      ctx.drawImage(landerImg, lander.x, lander.y, lander.width, lander.height);
+
+      // Dati di volo
+      ctx.fillStyle = "white";
+      ctx.font = "16px Arial";
+      ctx.fillText(`Carburante: ${Math.max(0, lander.fuel.toFixed(0))}`, 10, 20);
+      ctx.fillText(`Velocità verticale: ${lander.vy.toFixed(3)}`, 10, 40);
+      ctx.fillText(`Velocità orizzontale: ${lander.vx.toFixed(3)}`, 10, 60);
+      ctx.fillText(`Altitudine: ${(landingZone.y - lander.y - lander.height).toFixed(1)} px`, 10, 80);
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+  </script>
+</body>
+</html>
