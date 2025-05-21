@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simulazione Allunaggio</title>
+  <style>
+    body {
+  margin: 0;
+  background: linear-gradient(to bottom, #000010, #000000);
+  font-family: "Segoe UI", sans-serif;
+  color: white;
+  text-align: center;
+}
+
+canvas {
+  display: block;
+  margin: 0 auto;
+  margin-top: 20px;
+  background: transparent;
+}
+
+.controls {
+  margin: 10px auto;
+  max-width: 800px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+}
+
+button:hover {
+  background: #218838;
+}
+
+.info {
+  font-size: 13px;
+  color: #ccc;
+}
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="800" height="500"></canvas>
+
+  <div class="controls">
+    <button id="restartBtn">EFFETTUA DI NUOVO LA SIMULAZIONE</button>
+    <p>Velocità: <span id="speedDisplay">0</span> m/s</p>
+    <p>Carburante: <span id="fuelDisplay">100</span>%</p>
+    <p class="info">Usa ← → per muoverti, SPAZIO per frenare</p>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+const rocket = {
+  x: canvas.width / 2,
+  y: 50,
+  vx: 0,
+  vy: 0,
+  width: 20,
+  height: 40,
+  fuel: 100,
+  thrust: -0.25
+};
+
+const gravity = 0.03;
+const landingZone = { x: canvas.width / 2 - 40, y: canvas.height - 40, width: 80, height: 10 };
+let gameOver = false;
+let animationId;
+
+document.addEventListener("keydown", (e) => {
+  if (e.code === "Space") e.preventDefault();
+  if (gameOver) return;
+
+  if (e.code === "ArrowLeft") rocket.vx -= 0.1;
+  if (e.code === "ArrowRight") rocket.vx += 0.1;
+});
+
+document.getElementById("restartBtn").addEventListener("click", () => {
+  rocket.x = Math.random() * (canvas.width-rocket.width);
+  rocket.y = 50;
+  rocket.vx = 0;
+  rocket.vy = 0;
+  rocket.fuel = 100;
+  gameOver = false;
+  document.getElementById("fuelDisplay").textContent = "100";
+  document.getElementById("speedDisplay").textContent = "0";
+  if (animationId) cancelAnimationFrame(animationId);
+animationId = requestAnimationFrame(update);
+});
+
+// Stelle con effetto bagliore realistico
+let stars = Array.from({ length: 100 }, () => ({
+  x: Math.random() * canvas.width,
+  y: Math.random() * canvas.height / 2,
+  radius: Math.random() * 0.5 + 0.5,
+  opacity: Math.random()
+}));
+
+function drawStars() {
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  for (let star of stars) {
+    const gradient = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, star.radius * 4);
+    gradient.addColorStop(0, `rgba(255, 255, 255, ${star.opacity})`);
+    gradient.addColorStop(1, "transparent");
+
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(star.x, star.y, star.radius * 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    star.opacity += (Math.random() - 0.5) * 0.02;
+    star.opacity = Math.max(0.1, Math.min(1, star.opacity));
+  }
+}
+
+function drawGround() {
+  ctx.fillStyle = "#444";
+  ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
+
+  ctx.fillStyle = "#00ff00";
+  ctx.fillRect(landingZone.x, landingZone.y, landingZone.width, landingZone.height);
+}
+
+function drawRocket() {
+  // Corpo
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.moveTo(rocket.x + rocket.width / 2, rocket.y);
+  ctx.lineTo(rocket.x, rocket.y + rocket.height);
+  ctx.lineTo(rocket.x + rocket.width, rocket.y + rocket.height);
+  ctx.closePath();
+  ctx.fill();
+
+  // Ali laterali
+  ctx.fillStyle = "red";
+  ctx.fillRect(rocket.x - 5, rocket.y + rocket.height - 10, 5, 10);
+  ctx.fillRect(rocket.x + rocket.width, rocket.y + rocket.height - 10, 5, 10);
+
+  // Fiamma motore
+  if (keys.Space && rocket.fuel > 0) {
+    ctx.beginPath();
+    ctx.moveTo(rocket.x + rocket.width / 2, rocket.y + rocket.height);
+    ctx.lineTo(rocket.x + rocket.width / 2 - 5, rocket.y + rocket.height + 10);
+    ctx.lineTo(rocket.x + rocket.width / 2 + 5, rocket.y + rocket.height + 10);
+    ctx.closePath();
+    ctx.fillStyle = "orange";
+    ctx.fill();
+  }
+}
+
+let keys = {};
+
+document.addEventListener("keydown", (e) => {
+  keys[e.code] = true;
+});
+
+document.addEventListener("keyup", (e) => {
+  keys[e.code] = false;
+});
+
+function update() {
+  if (gameOver) return;
+
+  if (keys.Space && rocket.fuel > 0) {
+    rocket.vy += rocket.thrust;
+    rocket.fuel -= 0.5;
+  }
+
+  rocket.vy += gravity;
+  rocket.x += rocket.vx;
+  rocket.y += rocket.vy;
+
+  // Collisione con il suolo
+  if (rocket.y + rocket.height >= landingZone.y) {
+    rocket.y = landingZone.y - rocket.height;
+
+    const withinLandingZone =
+      rocket.x + rocket.width / 2 >= landingZone.x &&
+      rocket.x + rocket.width / 2 <= landingZone.x + landingZone.width;
+
+    if (rocket.vy < 1 && withinLandingZone) {
+      alert("Atterraggio riuscito!");
+    } else {
+      alert("Allunaggio fallito!");
+    }
+
+    gameOver = true;
+  }
+
+  document.getElementById("speedDisplay").textContent = rocket.vy.toFixed(2);
+  document.getElementById("fuelDisplay").textContent = Math.max(0, rocket.fuel.toFixed(0));
+
+  drawStars();
+  drawGround();
+  drawRocket();
+
+  if (!gameOver) if (animationId) cancelAnimationFrame(animationId);
+animationId = requestAnimationFrame(update);
+}
+
+update();
+  </script>
+</body>
+</html>
