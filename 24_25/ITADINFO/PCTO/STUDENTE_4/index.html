@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>STEAM Who?</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #83a4d4, #b6fbff);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    }
+    h1 {
+      color: #333;
+    }
+    .question {
+      font-size: 20px;
+      margin: 20px 0;
+    }
+    button {
+      font-size: 18px;
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn-yes { background-color: #4CAF50; color: white; }
+    .btn-no { background-color: #f44336; color: white; }
+    .btn-restart { background-color: #2196F3; color: white; margin-top: 20px; display: none; }
+    .result { font-size: 22px; margin-top: 20px; font-weight: bold; }
+    img { max-width: 100%; border-radius: 10px; margin-top: 15px; display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>STEAM Who?</h1>
+    <div class="question" id="question">La persona è ancora viva?</div>
+    <button class="btn-yes" onclick="nextQuestion(true)">Sì</button>
+    <button class="btn-no" onclick="nextQuestion(false)">No</button>
+    <div class="result" id="result"></div>
+    <img id="characterImage" src="" alt="">
+    <button class="btn-restart" onclick="restartGame()" id="restartBtn">Ricomincia</button>
+  </div>
+
+  <script>
+    const questions = [
+      { text: "La persona è ancora viva?", yes: 1, no: 2 },
+      { text: "Lavora nell'informatica?", yes: 3, no: 4 },
+      { text: "Ha lavorato con l'elettricità?", yes: 9, no: 5 },
+
+      { text: "È una donna?", yes: 6, no: 7 },
+      { text: "È un astrofisico?", yes: 8, no: 17 },
+
+      { text: "Ha fatto scoperte sulla radioattività?", yes: 13, no: 14 },
+
+      { text: "Il personaggio è Margaret Hamilton!", image: "https://upload.wikimedia.org/wikipedia/commons/9/9f/Margaret_Hamilton_1969.jpg" },
+      { text: "Il personaggio è Tim Berners-Lee!", image: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Tim_Berners-Lee_CP_2.jpg" },
+      { text: "Il personaggio è Stephen Hawking!", image: "https://upload.wikimedia.org/wikipedia/commons/e/eb/Stephen_Hawking.StarChild.jpg" },
+
+      { text: "Il personaggio è Nikola Tesla!", image: "https://upload.wikimedia.org/wikipedia/commons/d/d4/N.Tesla.JPG" },
+      { text: "Ha inventato il primo computer?", yes: 11, no: 12 },
+
+      { text: "Il personaggio è Charles Babbage!", image: "https://upload.wikimedia.org/wikipedia/commons/3/39/Charles_Babbage_-_1860.jpg" },
+      { text: "Il personaggio è Leonardo da Vinci!", image: "https://upload.wikimedia.org/wikipedia/commons/6/6e/Leonardo_self.jpg" },
+
+      { text: "Il personaggio è Marie Curie!", image: "https://upload.wikimedia.org/wikipedia/commons/6/69/Marie_Curie_c1920.jpg" },
+      { text: "Ha creato un linguaggio di programmazione?", yes: 15, no: 16 },
+
+      { text: "Il personaggio è Ada Lovelace!", image: "https://upload.wikimedia.org/wikipedia/commons/9/95/Ada_Lovelace_portrait.jpg" },
+      { text: "Il personaggio è Rosalind Franklin!", image: "https://upload.wikimedia.org/wikipedia/commons/a/a0/Rosalind_Franklin.jpg" },
+
+      { text: "Il personaggio è Alan Turing!", image: "https://upload.wikimedia.org/wikipedia/commons/a/a1/Alan_Turing_Aged_16.jpg" },
+    ];
+
+    let currentIndex = 0;
+
+    function nextQuestion(answer) {
+      const node = questions[currentIndex];
+      const nextIndex = answer ? node.yes : node.no;
+
+      if (nextIndex !== undefined) {
+        currentIndex = nextIndex;
+        const next = questions[currentIndex];
+
+        if (next.image) {
+          showResult(next.text, next.image);
+        } else {
+          document.getElementById("question").innerText = next.text;
+        }
+      }
+    }
+
+    function showResult(text, imageSrc) {
+      document.getElementById("question").style.display = "none";
+      document.querySelector(".btn-yes").style.display = "none";
+      document.querySelector(".btn-no").style.display = "none";
+      document.getElementById("result").innerText = text;
+      const img = document.getElementById("characterImage");
+      img.src = imageSrc;
+      img.style.display = "block";
+      document.getElementById("restartBtn").style.display = "inline-block";
+    }
+
+    function restartGame() {
+      currentIndex = 0;
+      document.getElementById("question").innerText = questions[0].text;
+      document.getElementById("question").style.display = "block";
+      document.querySelector(".btn-yes").style.display = "inline-block";
+      document.querySelector(".btn-no").style.display = "inline-block";
+      document.getElementById("result").innerText = "";
+      document.getElementById("characterImage").style.display = "none";
+      document.getElementById("restartBtn").style.display = "none";
+    }
+  </script>
+</body>
+</html>
