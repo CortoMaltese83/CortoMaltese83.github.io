@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Progetti PCTO – STEAM Who?</title>
+  <style>
+    :root{
+      --primary:#018494; /* blu petrolio */
+      --accent:#4ca9b2;  /* acqua */
+      --muted:#93cbce;   /* azzurro chiaro */
+      --white:#ffffff;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial,sans-serif;
+      background: linear-gradient(180deg, var(--white), #f7fbfc 45%);
+      color:#053b44;
+      display:flex; align-items:center; justify-content:center; padding:32px;
+    }
+    .wrap{width:min(1000px,100%);}
+    header{
+      display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:24px;
+      border-bottom:2px solid var(--muted); padding-bottom:16px;
+    }
+    h1{font-size:clamp(1.2rem,2.6vw,1.8rem); margin:0; color:var(--primary)}
+    .subtitle{font-size:0.95rem; color:#0a5863}
+
+    .grid{
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px;
+    }
+    .card{
+      background:var(--white);
+      border:1.5px solid var(--muted);
+      border-radius:14px; padding:18px; position:relative; overflow:hidden;
+      transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+      box-shadow:0 2px 10px rgba(1,132,148,.06);
+    }
+    .card::after{ /* decorazione angolare */
+      content:""; position:absolute; inset:auto -20px -20px auto; width:120px; height:120px; border-radius:50%;
+      background:radial-gradient(circle at 30% 30%, var(--muted), transparent 60%);
+      opacity:.35; pointer-events:none;
+    }
+    .card:hover{transform:translateY(-2px); box-shadow:0 6px 22px rgba(1,132,148,.18); border-color:var(--accent)}
+
+    .tag{display:inline-block; font-size:.75rem; background:var(--muted); color:#064650; padding:4px 10px; border-radius:999px; margin-bottom:10px;}
+    .title{font-weight:700; color:var(--primary); margin:0 0 6px; font-size:1.05rem}
+    .desc{font-size:.9rem; color:#0a5863; margin:0 0 14px}
+
+    .actions{display:flex; gap:10px; flex-wrap:wrap}
+    .btn{
+      --bg: var(--primary);
+      display:inline-flex; align-items:center; gap:8px;
+      text-decoration:none; font-weight:600; letter-spacing:.2px;
+      background:var(--bg); color:var(--white); padding:10px 14px; border-radius:12px; border:2px solid transparent;
+      transition:background .15s ease, color .15s ease, border-color .15s ease;
+    }
+    .btn.secondary{ --bg: var(--accent); }
+    .btn:hover{ filter:saturate(1.08) brightness(0.98); }
+    .btn:focus{ outline:none; border-color:#013c44; }
+
+    footer{margin-top:26px; text-align:center; color:#0a5863; font-size:.9rem}
+    .note{background: #ecf6f7; border:1px dashed var(--muted); color:#0a5863; padding:10px 12px; border-radius:10px; display:inline-block}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  </style>
+</head>
+<body>
+  <main class="wrap" role="main">
+    <header>
+      <div>
+        <h1>Progetti PCTO – <span style="color:#0a5863">STEAM Who?</span></h1>
+        <p class="subtitle">Quattro prototipi client‑side sviluppati dagli studenti con supporto di AI generativa.</p>
+      </div>
+    </header>
+
+    <section class="grid" aria-label="Elenco progetti">
+      <article class="card" aria-labelledby="p1-title">
+        <span class="tag">Studente 1</span>
+        <h2 id="p1-title" class="title">Akinator STEAM</h2>
+        <p class="desc">Interfaccia ispirata ad Akinator, flusso Q&A modellizzato e responsive design.</p>
+        <div class="actions">
+          <a class="btn" target="_blank" rel="noopener noreferrer" href="https://cortomaltese83.github.io/24_25/ITADINFO/PCTO/STUDENTE_1/" aria-label="Apri il progetto Studente 1 in una nuova scheda">Apri progetto</a>
+          <a class="btn secondary" target="_blank" rel="noopener noreferrer" href="https://cortomaltese83.github.io/24_25/ITADINFO/PCTO/STUDENTE_1/">Sorgenti/Preview</a>
+        </div>
+      </article>
+
+      <article class="card" aria-labelledby="p2-title">
+        <span class="tag">Studente 2</span>
+        <h2 id="p2-title" class="title">STEAM Who? – UI coerente</h2>
+        <p class="desc">Struttura modulare, gerarchie visive e sperimentazione di effetti grafici.</p>
+        <div class="actions">
+          <a class="btn" target="_blank" rel="noopener noreferrer" href="https://cortomaltese83.github.io/24_25/ITADINFO/PCTO/STUDENTE_2/" aria-label="Apri il progetto Studente 2 in una nuova scheda">Apri progetto</a>
+          <a class="btn secondary" target="_blank" rel="noopener noreferrer" href="https://cortomaltese83.github.io/24_25/ITADINFO/PCTO/STUDENTE_2/">Sorgenti/Preview</a>
+        </div>
+      </article>
+
+      <article class="card" aria-labelledby="p3-title">
+        <span class="tag">Studente 3</span>
+        <h2 id="p3-title" class="title">Variante funzionale</h2>
+        <p class="desc">Selezione del personaggio ex‑ante; riorganizzazione del flusso interattivo.</p>
+        <div class="actions">
+          <a class="btn" target="_blank" rel="noopener noreferrer" href="https://cortomaltese83.github.io/24_25/ITADINFO/PCTO/STUDENTE_3/" aria-label="Apri il progetto Studente 3 in una nuova scheda">Apri progetto</a>
+          <a class="btn secondary" target="_blank" rel="noopener noreferrer" href="https://cortomaltese83.github.io/24_25/ITADINFO/PCTO/STUDENTE_3/">Sorgenti/Preview</a>
+        </div>
+      </article>
+
+      <article class="card" aria-labelledby="p4-title">
+        <span class="tag">Studente 4</span>
+        <h2 id="p4-title" class="title">Sequenza fissa (5 domande)</h2>
+        <p class="desc">Versione essenziale con set ridotto di personaggi e logica lineare.</p>
+        <div class="actions">
+          <a class="btn" target="_blank" rel="noopener noreferrer" href="https://cortomaltese83.github.io/24_25/ITADINFO/PCTO/STUDENTE_4/" aria-label="Apri il progetto Studente 4 in una nuova scheda">Apri progetto</a>
+          <a class="btn secondary" target="_blank" rel="noopener noreferrer" href="https://cortomaltese83.github.io/24_25/ITADINFO/PCTO/STUDENTE_4/">Sorgenti/Preview</a>
+        </div>
+      </article>
+    </section>
+
+    <footer>
+      <p class="note" aria-live="polite">Suggerimento: stampa questo URL come <strong>QR code</strong> nel poster per l’accesso rapido.</p>
+    </footer>
+  </main>
+</body>
+</html>
