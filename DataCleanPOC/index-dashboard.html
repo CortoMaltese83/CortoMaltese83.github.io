@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Esiti & Classi – Sostenibilità</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root{
       --acqua: #20c5bd;
@@ -104,19 +105,20 @@
 
     .hint{font-size:12px;color:var(--muted)}
   </style>
+  
 </head>
 <body>
-    <header>
-      <div class="header-wrap">
-        <div class="brand">
-          <img src="img/logo-sfondo-bianco-verticale.png" alt="Dataclean logo" />
-          <div>
-            <div class="title">Scheda di sostenibilità ICT</div>
-            <div class="subtitle">Indicatori PUE · WUE · CUE · SCI — Emissioni da AWS</div>
-          </div>
+  <header>
+    <div class="header-wrap">
+      <div class="brand">
+        <img src="img/logo-sfondo-bianco-verticale.png" alt="Dataclean logo" />
+        <div>
+          <div class="title">Scheda di sostenibilità ICT</div>
+          <div class="subtitle">Indicatori PUE · WUE · CUE · SCI — Emissioni da AWS</div>
         </div>
       </div>
-    </header>
+    </div>
+  </header>
   <div class="container">
     <!-- PUE -->
     <section id="sec-pue" class="section" aria-labelledby="pue-title">
@@ -137,9 +139,11 @@
           <p class="hint">Minore è meglio • Classi A–E</p>
         </article>
         <article class="card">
-          <div class="muted">Trend (mock)</div>
-          <div class="chart-area">Sostituire con grafico</div>
-          <p class="hint">Inserire un grafico a linee/area con dati reali.</p>
+          <div class="muted">Trend PUE</div>
+          <div class="chart-area">
+            <canvas id="chartPUE"></canvas>
+          </div>
+          <p class="hint">Andamento delle ultime 7 esecuzioni del report</p>
         </article>
         <article class="card">
           <div class="muted">Immagine / Evidenza</div>
@@ -168,9 +172,11 @@
           <p class="hint">Minore è meglio • Classi A–E</p>
         </article>
         <article class="card">
-          <div class="muted">Trend (mock)</div>
-          <div class="chart-area">Sostituire con grafico</div>
-          <p class="hint">Inserire un grafico a linee/area con dati reali.</p>
+          <div class="muted">Trend WUE</div>
+          <div class="chart-area">
+            <canvas id="chartWUE"></canvas>
+          </div>
+          <p class="hint">Andamento delle ultime 7 esecuzioni del report</p>
         </article>
         <article class="card">
           <div class="muted">Immagine / Evidenza</div>
@@ -199,9 +205,11 @@
           <p class="hint">Minore è meglio • Classi A–E</p>
         </article>
         <article class="card">
-          <div class="muted">Trend (mock)</div>
-          <div class="chart-area">Sostituire con grafico</div>
-          <p class="hint">Inserire un grafico a linee/area con dati reali.</p>
+          <div class="muted">Trend CUE</div>
+          <div class="chart-area">
+            <canvas id="chartCUE"></canvas>
+          </div>
+          <p class="hint">Andamento delle ultime 7 esecuzioni del report</p>
         </article>
         <article class="card">
           <div class="muted">Immagine / Evidenza</div>
@@ -230,9 +238,11 @@
           <p class="hint">Minore è meglio • Classi A–E</p>
         </article>
         <article class="card">
-          <div class="muted">Trend (mock)</div>
-          <div class="chart-area">Sostituire con grafico</div>
-          <p class="hint">Inserire un grafico a linee/area con dati reali.</p>
+          <div class="muted">Trend SCI</div>
+          <div class="chart-area">
+            <canvas id="chartSCI"></canvas>
+          </div>
+          <p class="hint">Andamento delle ultime 7 esecuzioni del report</p>
         </article>
         <article class="card">
           <div class="muted">Immagine / Evidenza</div>
@@ -346,6 +356,76 @@
       `;
       tbody.appendChild(tr);
     });
+
+    // -----------------------------
+    // Grafici indici
+    // -----------------------------
+// Etichette temporali comuni (mock)
+    const LABELS = ["T-6","T-5","T-4","T-3","T-2","T-1","Now"];
+
+    // Dati mock per ciascun indicatore (sostituisci liberamente)
+    const DATASETS = {
+      PUE: [1.36, 1.33, 1.31, 1.30, 1.29, 1.28, 1.27],
+      WUE: [0.92, 0.86, 0.83, 0.82, 0.80, 0.79, 0.78],
+      CUE: [0.27, 0.24, 0.23, 0.23, 0.22, 0.22, 0.21],
+      SCI: [18.5, 16.9, 15.1, 14.3, 13.6, 12.9, 12.3]
+    };
+
+    // Colori coerenti
+    const COLORS = {
+      PUE: "#6366f1", // indigo
+      WUE: "#0ea5e9", // sky
+      CUE: "#10b981", // emerald
+      SCI: "#a21caf"  // fuchsia-700
+    };
+
+    // Helper per creare un grafico lineare
+    function makeLineChart(canvasId, label, color, data, yTitle) {
+      const ctx = document.getElementById(canvasId).getContext("2d");
+      return new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: LABELS,
+          datasets: [{
+            label,
+            data,
+            borderColor: color,
+            backgroundColor: color + "20", // trasparenza per l'area
+            borderWidth: 2,
+            fill: true,
+            tension: 0.35,
+            pointRadius: 3,
+            pointBackgroundColor: color
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            title: { display: false }
+          },
+          interaction: { mode: "index", intersect: false },
+          scales: {
+            x: {
+              grid: { display: false },
+              title: { display: false }
+            },
+            y: {
+              grid: { color: "#eef2f7" },
+              ticks: { precision: 2 },
+              title: { display: !!yTitle, text: yTitle }
+            }
+          }
+        }
+      });
+    }
+
+    // Istanzia i 4 grafici
+    makeLineChart("chartPUE", "PUE", COLORS.PUE, DATASETS.PUE, "Valore PUE");
+    makeLineChart("chartWUE", "WUE", COLORS.WUE, DATASETS.WUE, "m³/MWh");
+    makeLineChart("chartCUE", "CUE", COLORS.CUE, DATASETS.CUE, "kgCO₂e/kWh IT");
+    makeLineChart("chartSCI", "SCI", COLORS.SCI, DATASETS.SCI, "gCO₂e / richiesta");
   </script>
 </body>
 </html>
