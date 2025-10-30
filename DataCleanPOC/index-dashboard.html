@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Esiti & Classi – Sostenibilità (Solo HTML)</title>
+  <style>
+    :root{
+      --acqua: #20c5bd;
+      --bg:#f7fafc;         /* sfondo pagina */
+      --card:#ffffff;        /* sfondo card */
+      --ink:#0f172a;         /* testo primario */
+      --muted:#475569;       /* testo secondario */
+      --border:#e2e8f0;      /* bordo */
+      --brand1:#6366f1;      /* indigo */
+      --brand2:#06b6d4;      /* cyan */
+      --good:#10b981;        /* emerald */
+      --warn:#f59e0b;        /* amber */
+      --bad:#ef4444;         /* red */
+      --pue:#6366f1;         /* colori sezione */
+      --wue:#0ea5e9;
+      --cue:#10b981;
+      --sci:#a21caf;         /* fuchsia-700 */
+      --radius:16px;
+      --shadow:0 6px 20px rgba(2,6,23,0.08);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:linear-gradient(140deg,#ffffff, #448aaa 40%, #ffffff);color:var(--ink)}
+    
+    .container{
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 205px 20px 32px 20px;
+    }
+    
+    h1{font-size:clamp(24px,3vw,34px);margin:0 0 6px 0}
+    
+    .lead{color:var(--muted);font-size:15px;max-width:900px}
+
+    /* ====== HEADER ====== */
+    header{
+      padding:16px 16px 14px;
+      border-bottom:4px solid var(--acqua);
+      background:#fff;
+      position: fixed;
+      width: 100%;
+      z-index: 1;
+    }
+    .header-wrap{
+      display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+    }
+    .brand img{
+      height:180px; width:auto; object-fit:contain;
+      image-rendering:auto;
+    }
+    @media(min-width:720px){
+      .brand img{ height:180px; }
+    }
+    .title{font-weight:800; letter-spacing:.2px; font-size:1.45rem}
+    .subtitle{color:var(--muted); font-size:.95rem}
+
+    /* Section */
+    .section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 20px 24px 20px;margin-top:22px;box-shadow:var(--shadow)}
+    .section-header{display:flex;gap:16px;align-items:flex-start;justify-content:space-between}
+    .dot{width:10px;height:10px;border-radius:999px;flex:0 0 auto;margin-top:10px}
+    .title{font-weight:700;font-size:22px;margin:0}
+    .desc{color:var(--muted);font-size:14px;margin:6px 0 0 0;max-width:720px}
+
+    .grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px}
+    @media (min-width: 980px){.grid{grid-template-columns:1fr 1fr 1fr}}
+
+    /* Card KPI */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+    .band{height:6px;border-radius:6px;background:linear-gradient(90deg,#16a34a,#84cc16,#f59e0b,#f97316,#ef4444);opacity:.85;margin:-16px -16px 12px -16px}
+    .muted{color:var(--muted);font-size:12px}
+    .kpi-title{font-size:18px;margin:0 0 2px 0}
+    .kpi-value{font-size:28px;font-weight:800}
+    .kpi-unit{color:var(--muted);margin-left:6px;font-size:14px}
+
+    /* Placeholder grafico e immagine */
+    .chart-area,.image-ph{height:170px;border:1px dashed var(--border);border-radius:12px;background:linear-gradient(140deg,#f0f9ff,#ffffff);display:flex;align-items:center;justify-content:center;color:#64748b;font-size:13px}
+
+    /* Badge classe */
+    .badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;border:1px solid var(--border);padding:8px 12px;font-weight:700;font-size:14px}
+    .A{background:#ecfdf5;color:#065f46;border-color:#a7f3d0}
+    .B{background:#f7fee7;color:#365314;border-color:#d9f99d}
+    .C{background:#fffbeb;color:#92400e;border-color:#fde68a}
+    .D{background:#fff7ed;color:#9a3412;border-color:#fed7aa}
+    .E{background:#fef2f2;color:#7f1d1d;border-color:#fecaca}
+
+    /* Allarmi */
+    .alarms{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-top:26px;box-shadow:var(--shadow)}
+    table{width:100%;border-collapse:separate;border-spacing:0}
+    th,td{padding:12px 10px;text-align:left;border-bottom:1px solid var(--border);font-size:14px}
+    th{background:#f8fafc;color:#475569;font-weight:600}
+    .state{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:600;font-size:12px;border:1px solid}
+    .ok{background:#ecfdf5;color:#065f46;border-color:#a7f3d0}
+    .warn{background:#fffbeb;color:#92400e;border-color:#fde68a}
+    .alert{background:#fef2f2;color:#7f1d1d;border-color:#fecaca}
+    .note{color:var(--muted);font-size:12px;margin-top:8px}
+
+    .hint{font-size:12px;color:var(--muted)}
+  </style>
+</head>
+<body>
+    <header>
+      <div class="header-wrap">
+        <div class="brand">
+          <img src="img/logo-sfondo-bianco-verticale.png" alt="Dataclean logo" />
+          <div>
+            <div class="title">Scheda di sostenibilità ICT</div>
+            <div class="subtitle">Indicatori PUE · WUE · CUE · SCI — emissioni da AWS e soglie personalizzabili</div>
+          </div>
+        </div>
+      </div>
+    </header>
+  <div class="container">
+    <!-- PUE -->
+    <section id="sec-pue" class="section" aria-labelledby="pue-title">
+      <div class="section-header">
+        <div>
+          <div class="dot" style="background:var(--pue)"></div>
+          <h2 id="pue-title" class="title">PUE – Power Usage Effectiveness</h2>
+          <p class="desc">Efficienza energetica complessiva (minore è meglio).</p>
+        </div>
+        <span id="pue-badge" class="badge">Classe –</span>
+      </div>
+      <div class="grid">
+        <article class="card">
+          <div class="band"></div>
+          <div class="muted">Esito</div>
+          <h3 class="kpi-title">Valore attuale</h3>
+          <div><span id="pue-val" class="kpi-value">—</span><span class="kpi-unit"></span></div>
+          <p class="hint">Minore è meglio • Classi A–E</p>
+        </article>
+        <article class="card">
+          <div class="muted">Trend (mock)</div>
+          <div class="chart-area">Sostituire con grafico</div>
+          <p class="hint">Inserire un grafico a linee/area con dati reali.</p>
+        </article>
+        <article class="card">
+          <div class="muted">Immagine / Evidenza</div>
+          <div class="image-ph">PUE – Inserisci qui un'immagine</div>
+          <p class="hint">Carica diagrammi, foto impianti o certificazioni.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- WUE -->
+    <section id="sec-wue" class="section" aria-labelledby="wue-title">
+      <div class="section-header">
+        <div>
+          <div class="dot" style="background:var(--wue)"></div>
+          <h2 id="wue-title" class="title">WUE – Water Usage Effectiveness</h2>
+          <p class="desc">Consumo d'acqua per energia (m³/MWh, minore è meglio).</p>
+        </div>
+        <span id="wue-badge" class="badge">Classe –</span>
+      </div>
+      <div class="grid">
+        <article class="card">
+          <div class="band"></div>
+          <div class="muted">Esito</div>
+          <h3 class="kpi-title">Valore attuale</h3>
+          <div><span id="wue-val" class="kpi-value">—</span><span class="kpi-unit"> m³/MWh</span></div>
+          <p class="hint">Minore è meglio • Classi A–E</p>
+        </article>
+        <article class="card">
+          <div class="muted">Trend (mock)</div>
+          <div class="chart-area">Sostituire con grafico</div>
+          <p class="hint">Inserire un grafico a linee/area con dati reali.</p>
+        </article>
+        <article class="card">
+          <div class="muted">Immagine / Evidenza</div>
+          <div class="image-ph">WUE – Inserisci qui un'immagine</div>
+          <p class="hint">Carica diagrammi, foto impianti o certificazioni.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- CUE -->
+    <section id="sec-cue" class="section" aria-labelledby="cue-title">
+      <div class="section-header">
+        <div>
+          <div class="dot" style="background:var(--cue)"></div>
+          <h2 id="cue-title" class="title">CUE – Carbon Usage Effectiveness</h2>
+          <p class="desc">Emissioni per kWh IT (kgCO₂e/kWh IT, minore è meglio).</p>
+        </div>
+        <span id="cue-badge" class="badge">Classe –</span>
+      </div>
+      <div class="grid">
+        <article class="card">
+          <div class="band"></div>
+          <div class="muted">Esito</div>
+          <h3 class="kpi-title">Valore attuale</h3>
+          <div><span id="cue-val" class="kpi-value">—</span><span class="kpi-unit"> kgCO₂e/kWh</span></div>
+          <p class="hint">Minore è meglio • Classi A–E</p>
+        </article>
+        <article class="card">
+          <div class="muted">Trend (mock)</div>
+          <div class="chart-area">Sostituire con grafico</div>
+          <p class="hint">Inserire un grafico a linee/area con dati reali.</p>
+        </article>
+        <article class="card">
+          <div class="muted">Immagine / Evidenza</div>
+          <div class="image-ph">CUE – Inserisci qui un'immagine</div>
+          <p class="hint">Carica diagrammi, foto impianti o certificazioni.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- SCI -->
+    <section id="sec-sci" class="section" aria-labelledby="sci-title">
+      <div class="section-header">
+        <div>
+          <div class="dot" style="background:var(--sci)"></div>
+          <h2 id="sci-title" class="title">SCI – Software Carbon Intensity</h2>
+          <p class="desc">Emissioni per richiesta API (gCO₂e per richiesta, minore è meglio).</p>
+        </div>
+        <span id="sci-badge" class="badge">Classe –</span>
+      </div>
+      <div class="grid">
+        <article class="card">
+          <div class="band"></div>
+          <div class="muted">Esito</div>
+          <h3 class="kpi-title">Valore attuale</h3>
+          <div><span id="sci-val" class="kpi-value">—</span><span class="kpi-unit"> gCO₂e/richiesta</span></div>
+          <p class="hint">Minore è meglio • Classi A–E</p>
+        </article>
+        <article class="card">
+          <div class="muted">Trend (mock)</div>
+          <div class="chart-area">Sostituire con grafico</div>
+          <p class="hint">Inserire un grafico a linee/area con dati reali.</p>
+        </article>
+        <article class="card">
+          <div class="muted">Immagine / Evidenza</div>
+          <div class="image-ph">SCI – Inserisci qui un'immagine</div>
+          <p class="hint">Carica diagrammi, foto impianti o certificazioni.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- Pannello Allarmi -->
+    <section class="alarms" aria-labelledby="alarms-title">
+      <h2 id="alarms-title" style="margin:0 0 6px 0">Allarmi & Realtime</h2>
+      <div class="hint">*Valori e soglie mock – personalizzare per il certificato realtime*</div>
+      <div style="overflow:auto;margin-top:10px">
+        <table id="alarm-table" aria-describedby="alarms-title">
+          <thead>
+            <tr>
+              <th>Indicatore</th>
+              <th>Valore</th>
+              <th>Soglia allarme</th>
+              <th>Stato</th>
+              <th>Nota</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="note">Politica (mock): allarme se <b>valore &gt; soglia</b> (per indicatori dove "minore è meglio"). "Attenzione" entro il 5% dalla soglia.</p>
+    </section>
+
+    <p class="hint" style="margin-top:14px">*Questa pagina usa valori e soglie dimostrative. Sostituisci i placeholder con fonti dati e immagini reali.*</p>
+  </div>
+
+  <script>
+    // -----------------------------
+    // Valori MOCK – modificabili
+    // -----------------------------
+    const VALUES = {
+      PUE: 1.32,      // minore è meglio
+      WUE: 0.78,      // m³/MWh
+      CUE: 0.21,      // kgCO2e/kWh IT
+      SCI: 12.5       // gCO2e per richiesta API
+    };
+
+    // Soglie mock per allarmi (personalizza)
+    const THRESHOLDS = {
+      PUE: 1.4,
+      WUE: 0.8,
+      CUE: 0.25,
+      SCI: 15
+    };
+
+    // Bande di classe A–E per ogni indicatore (limiti superiori per A-D)
+    const CLASS_BANDS = {
+      PUE: [1.2, 1.4, 1.6, 1.8],
+      WUE: [0.6, 0.8, 1.0, 1.2],
+      CUE: [0.15, 0.20, 0.25, 0.30],
+      SCI: [8, 12, 16, 20]
+    };
+
+    function valutaClasse(v, bands){
+      if (v <= bands[0]) return 'A';
+      if (v <= bands[1]) return 'B';
+      if (v <= bands[2]) return 'C';
+      if (v <= bands[3]) return 'D';
+      return 'E';
+    }
+
+    function setBadge(el, classe){
+      el.className = 'badge ' + classe; // sostituisce e applica stile
+      el.textContent = 'Classe ' + classe;
+    }
+
+    // Popola sezioni
+    document.getElementById('pue-val').textContent = VALUES.PUE.toFixed(2);
+    setBadge(document.getElementById('pue-badge'), valutaClasse(VALUES.PUE, CLASS_BANDS.PUE));
+
+    document.getElementById('wue-val').textContent = VALUES.WUE.toFixed(2);
+    setBadge(document.getElementById('wue-badge'), valutaClasse(VALUES.WUE, CLASS_BANDS.WUE));
+
+    document.getElementById('cue-val').textContent = VALUES.CUE.toFixed(2);
+    setBadge(document.getElementById('cue-badge'), valutaClasse(VALUES.CUE, CLASS_BANDS.CUE));
+
+    document.getElementById('sci-val').textContent = VALUES.SCI.toFixed(1);
+    setBadge(document.getElementById('sci-badge'), valutaClasse(VALUES.SCI, CLASS_BANDS.SCI));
+
+    // Pannello Allarmi
+    const tbody = document.querySelector('#alarm-table tbody');
+    const rows = [
+      {key:'PUE', label:'PUE'},
+      {key:'WUE', label:'WUE (m³/MWh)'},
+      {key:'CUE', label:'CUE (kgCO₂e/kWh IT)'},
+      {key:'SCI', label:'SCI (gCO₂e/richiesta)'}
+    ];
+
+    rows.forEach(r => {
+      const v = VALUES[r.key];
+      const th = THRESHOLDS[r.key];
+      const delta = v - th; // minore è meglio → allarme se v > th
+      let state = 'ok', note = 'Entro i limiti.';
+      if (delta > 0) { state = 'alert'; note = 'Soglia superata: intervento richiesto.'; }
+      else if (Math.abs(delta) <= th * 0.05) { state = 'warn'; note = 'Vicino alla soglia: valuta azioni correttive.'; }
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${r.label}</td>
+        <td>${v}</td>
+        <td>${th}</td>
+        <td><span class="state ${state}">${state === 'ok' ? 'OK' : (state === 'warn' ? 'Attenzione' : 'Allarme')}</span></td>
+        <td>${note}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  </script>
+</body>
+</html>
