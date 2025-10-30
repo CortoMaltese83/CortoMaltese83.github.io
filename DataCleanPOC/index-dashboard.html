@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Esiti & Classi – Sostenibilità</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3"></script>
   <style>
     :root{
       --acqua: #20c5bd;
@@ -104,6 +105,14 @@
     .note{color:var(--muted);font-size:12px;margin-top:8px}
 
     .hint{font-size:12px;color:var(--muted)}
+
+    /* Chat/news widgets */
+    .chat-box { border: 1px solid var(--border); border-radius: 12px; background: #f8fafc; display: flex; flex-direction: column; height: 170px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    .chat-title { background: #e2e8f0; font-weight: 600; font-size: 13px; color: #1e293b; padding: 6px 10px; }
+    .chat-messages { padding: 8px 10px; font-size: 13px; line-height: 1.4; overflow-y: auto; }
+    .chat-message { margin-bottom: 6px; border-left: 3px solid var(--border); padding-left: 8px; }
+    .chat-message strong { color: #0f172a; }
+    .chat-message time { color: #64748b; font-size: 11px; margin-left: 4px; }
   </style>
   
 </head>
@@ -146,9 +155,10 @@
           <p class="hint">Andamento delle ultime 7 esecuzioni del report</p>
         </article>
         <article class="card">
-          <div class="muted">Immagine / Evidenza</div>
-          <div class="image-ph">PUE – Inserisci qui un'immagine</div>
-          <p class="hint">Carica diagrammi, foto impianti o certificazioni.</p>
+          <div class="chat-box" id="chatPUE">
+            <div class="chat-title">📰 News &amp; Aggiornamenti PUE</div>
+            <div class="chat-messages"></div>
+          </div>
         </article>
       </div>
     </section>
@@ -179,9 +189,10 @@
           <p class="hint">Andamento delle ultime 7 esecuzioni del report</p>
         </article>
         <article class="card">
-          <div class="muted">Immagine / Evidenza</div>
-          <div class="image-ph">WUE – Inserisci qui un'immagine</div>
-          <p class="hint">Carica diagrammi, foto impianti o certificazioni.</p>
+          <div class="chat-box" id="chatWUE">
+            <div class="chat-title">📰 News &amp; Aggiornamenti WUE</div>
+            <div class="chat-messages"></div>
+          </div>
         </article>
       </div>
     </section>
@@ -212,9 +223,10 @@
           <p class="hint">Andamento delle ultime 7 esecuzioni del report</p>
         </article>
         <article class="card">
-          <div class="muted">Immagine / Evidenza</div>
-          <div class="image-ph">CUE – Inserisci qui un'immagine</div>
-          <p class="hint">Carica diagrammi, foto impianti o certificazioni.</p>
+          <div class="chat-box" id="chatCUE">
+            <div class="chat-title">📰 News &amp; Aggiornamenti CUE</div>
+            <div class="chat-messages"></div>
+          </div>
         </article>
       </div>
     </section>
@@ -245,9 +257,10 @@
           <p class="hint">Andamento delle ultime 7 esecuzioni del report</p>
         </article>
         <article class="card">
-          <div class="muted">Immagine / Evidenza</div>
-          <div class="image-ph">SCI – Inserisci qui un'immagine</div>
-          <p class="hint">Carica diagrammi, foto impianti o certificazioni.</p>
+          <div class="chat-box" id="chatSCI">
+            <div class="chat-title">📰 News &amp; Aggiornamenti SCI</div>
+            <div class="chat-messages"></div>
+          </div>
         </article>
       </div>
     </section>
@@ -272,14 +285,13 @@
       </div>
       <p class="note">Politica (mock): allarme se <b>valore &gt; soglia</b> (per indicatori dove "minore è meglio"). "Attenzione" entro il 5% dalla soglia.</p>
     </section>
-
-    <p class="hint" style="margin-top:14px">*Questa pagina usa valori e soglie dimostrative. Sostituisci i placeholder con fonti dati e immagini reali.*</p>
   </div>
 
   <script>
     // -----------------------------
     // Valori MOCK – modificabili
     // -----------------------------
+    if (window['chartjs-plugin-annotation']) { Chart.register(window['chartjs-plugin-annotation']); }
     const VALUES = {
       PUE: 1.32,      // minore è meglio
       WUE: 0.78,      // m³/MWh
@@ -379,8 +391,8 @@
       SCI: "#a21caf"  // fuchsia-700
     };
 
-    // Helper per creare un grafico lineare
-    function makeLineChart(canvasId, label, color, data, yTitle) {
+    // Helper per creare un grafico lineare con soglia (linea orizzontale)
+    function makeLineChart(canvasId, label, color, data, yTitle, threshold) {
       const ctx = document.getElementById(canvasId).getContext("2d");
       return new Chart(ctx, {
         type: "line",
@@ -390,7 +402,7 @@
             label,
             data,
             borderColor: color,
-            backgroundColor: color + "20", // trasparenza per l'area
+            backgroundColor: color + "20",
             borderWidth: 2,
             fill: true,
             tension: 0.35,
@@ -403,7 +415,27 @@
           maintainAspectRatio: false,
           plugins: {
             legend: { display: false },
-            title: { display: false }
+            title: { display: false },
+            annotation: {
+              annotations: {
+                threshold: {
+                  type: 'line',
+                  yMin: threshold,
+                  yMax: threshold,
+                  borderColor: '#ef4444',
+                  borderWidth: 2,
+                  borderDash: [6, 6],
+                  label: {
+                    display: true,
+                    content: 'Soglia ' + threshold,
+                    position: 'start',
+                    backgroundColor: 'rgba(239,68,68,0.1)',
+                    color: '#991b1b',
+                    padding: 4
+                  }
+                }
+              }
+            }
           },
           interaction: { mode: "index", intersect: false },
           scales: {
@@ -422,10 +454,57 @@
     }
 
     // Istanzia i 4 grafici
-    makeLineChart("chartPUE", "PUE", COLORS.PUE, DATASETS.PUE, "Valore PUE");
-    makeLineChart("chartWUE", "WUE", COLORS.WUE, DATASETS.WUE, "m³/MWh");
-    makeLineChart("chartCUE", "CUE", COLORS.CUE, DATASETS.CUE, "kgCO₂e/kWh IT");
-    makeLineChart("chartSCI", "SCI", COLORS.SCI, DATASETS.SCI, "gCO₂e / richiesta");
+    makeLineChart("chartPUE", "PUE", COLORS.PUE, DATASETS.PUE, "Valore PUE", THRESHOLDS.PUE);
+    makeLineChart("chartWUE", "WUE", COLORS.WUE, DATASETS.WUE, "m³/MWh", THRESHOLDS.WUE);
+    makeLineChart("chartCUE", "CUE", COLORS.CUE, DATASETS.CUE, "kgCO₂e/kWh IT", THRESHOLDS.CUE);
+    makeLineChart("chartSCI", "SCI", COLORS.SCI, DATASETS.SCI, "gCO₂e / richiesta", THRESHOLDS.SCI);
+
+
+    // -----------------------------
+    // Chat/news mock per ogni indice
+    // -----------------------------
+    const NEWS = {
+      PUE: [
+        { title: "Nuovo record: data center raggiunge PUE 1.12", date: "2025-10-28" },
+        { title: "Ottimizzazione UPS: -2% perdite distribuzione", date: "2025-10-27" },
+        { title: "Free cooling esteso riduce i consumi del 5%", date: "2025-10-25" },
+        { title: "Containment corridoi caldi completato nel pod B", date: "2025-10-23" },
+        { title: "Audit energetico trimestrale: PUE medio 1.29", date: "2025-10-18" }
+      ],
+      WUE: [
+        { title: "Riciclo acque grigie: risparmio stimato 18%", date: "2025-10-27" },
+        { title: "Nuovi filtri torri evaporative installati", date: "2025-10-24" },
+        { title: "DC in area arida introduce WUE a 0.67 m³/MWh", date: "2025-10-20" }
+      ],
+      CUE: [
+        { title: "Nuovo PPA solare: CUE stimato < 0.20 kgCO₂e/kWh", date: "2025-10-29" },
+        { title: "Switch notturno su fasce a bassa intensità carbonica", date: "2025-10-28" },
+        { title: "Emissioni dei DC europei in calo del 7% nel 2025", date: "2025-10-22" },
+        { title: "Batterie caricate con surplus eolico (pilot)", date: "2025-10-19" },
+        { title: "Report mensile: fattore di emissione medio 268 g/kWh", date: "2025-10-17" },
+        { title: "Certificazione GoO aggiornata per Q4", date: "2025-10-15" }
+      ],
+      SCI: [
+        { title: "Benchmark: API serverless SCI medio 9 gCO₂e/richiesta", date: "2025-10-26" },
+        { title: "Caching CDN porta -12% di emissioni per richiesta", date: "2025-10-24" },
+        { title: "Ottimizzazione query DB riduce emissioni del 18%", date: "2025-10-21" },
+        { title: "Autoscaling più aggressivo nelle ore notturne", date: "2025-10-19" }
+      ]
+    };
+
+    function populateChat(id, list) {
+      const box = document.querySelector(`#chat${id} .chat-messages`);
+      if (!box) return;
+      box.innerHTML = "";
+      list.forEach(n => {
+        const div = document.createElement("div");
+        div.className = "chat-message";
+        div.innerHTML = `<strong>${n.title}</strong> <time>${n.date}</time>`;
+        box.appendChild(div);
+      });
+    }
+
+    ["PUE", "WUE", "CUE", "SCI"].forEach(k => populateChat(k, NEWS[k]));
   </script>
 </body>
 </html>
