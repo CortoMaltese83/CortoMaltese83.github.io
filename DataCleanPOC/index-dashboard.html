@@ -49,8 +49,18 @@
       z-index: 1;
     }
     .header-wrap{
-      display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+      display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:space-between;
     }
+    /* Header actions */
+    .actions{ display:flex; align-items:center; gap:10px; margin-left:auto; }
+    .icon-btn{ position:relative; border:1px solid var(--border); background:#ffffff; color:#0f172a; border-radius:10px; padding:8px 10px; cursor:pointer; box-shadow:0 2px 8px rgba(2,6,23,0.06); transition:background .15s ease, transform .05s ease; }
+    .icon-btn:hover{ background:#f8fafc; }
+    .icon-btn:active{ transform:translateY(1px); }
+    .icon-btn svg{ width:20px; height:20px; display:block; }
+    .notif-badge{ position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; border-radius:999px; font-size:11px; line-height:1; padding:2px 6px; border:2px solid #fff; display:inline-flex; align-items:center; justify-content:center; min-width:18px; }
+    .print-btn{ display:inline-flex; align-items:center; gap:8px; font-weight:600; }
+    .print-btn span{ font-size:13px; }
+    @media(max-width:520px){ .print-btn span{ display:none; } }
     .brand{
       display:flex; align-items:center; gap:10px;
     }
@@ -113,6 +123,34 @@
     .chat-message { margin-bottom: 6px; border-left: 3px solid var(--border); padding-left: 8px; }
     .chat-message strong { color: #0f172a; }
     .chat-message time { color: #64748b; font-size: 11px; margin-left: 4px; }
+    
+    /* ====== PRINT STYLES ====== */
+    @media print {
+      @page { size: A4; margin: 12mm 12mm 14mm 12mm; }
+      html, body { background: #fff !important; }
+      header { display: none !important; }
+      .container { padding: 0 !important; margin: 0 auto !important; max-width: none !important; }
+
+      /* Cards & sections: no shadows, tighter spacing, avoid breaks inside */
+      .section { box-shadow: none !important; border-color: #bbbbbb !important; margin: 10mm 0 8mm !important; break-inside: avoid; page-break-inside: avoid; }
+      .grid { gap: 10px !important; }
+      .card { box-shadow: none !important; border-color: #cccccc !important; break-inside: avoid; page-break-inside: avoid; }
+
+      /* Tables: clearer headers in grayscale */
+      table { font-size: 12px; }
+      th { background: #eaeaea !important; color: #111 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+      /* Badges & bands: keep visible but subtle */
+      .badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .band { opacity: 0.6 !important; }
+
+      /* Hints and borders slightly darker */
+      .hint, .note { color: #444 !important; }
+      .chart-area, .chat-box { border-color: #dddddd !important; }
+
+      /* Remove page background gradients */
+      body { background-image: none !important; }
+    }
   </style>
   
 </head>
@@ -125,6 +163,23 @@
           <div class="title">Scheda di sostenibilità ICT</div>
           <div class="subtitle">Indicatori PUE · WUE · CUE · SCI — Emissioni da AWS</div>
         </div>
+      </div>
+      <div class="actions">
+        <button class="icon-btn print-btn" id="btnPrint" aria-label="Stampa report" title="Stampa report">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          <span>Stampa</span>
+        </button>
+        <button class="icon-btn" id="btnBell" aria-label="Notifiche" title="Notifiche">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span class="notif-badge" id="notifBadge">0</span>
+        </button>
       </div>
     </div>
   </header>
@@ -364,6 +419,15 @@
       `;
       tbody.appendChild(tr);
     });
+    // Aggiorna badge notifiche (warn + alert)
+    const numAlerts = document.querySelectorAll('.state.alert').length;
+    const numWarns = document.querySelectorAll('.state.warn').length;
+    const totalNotif = numAlerts + numWarns;
+    const badgeEl = document.getElementById('notifBadge');
+    if (badgeEl){
+      badgeEl.textContent = String(totalNotif);
+      badgeEl.style.display = totalNotif > 0 ? 'inline-flex' : 'none';
+    }
 
     // -----------------------------
     // Grafici indici
@@ -501,6 +565,16 @@
     }
 
     ["PUE", "WUE", "CUE", "SCI"].forEach(k => populateChat(k, NEWS[k]));
+
+    // Azioni header: stampa e navigazione notifiche
+    const btnPrint = document.getElementById('btnPrint');
+    if (btnPrint) btnPrint.addEventListener('click', () => window.print());
+
+    const btnBell = document.getElementById('btnBell');
+    if (btnBell) btnBell.addEventListener('click', () => {
+      const target = document.getElementById('alarms-title');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   </script>
 </body>
 </html>
