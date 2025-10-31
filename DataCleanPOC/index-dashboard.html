@@ -86,7 +86,7 @@
     .chart-area,.image-ph{height:170px;border:1px dashed var(--border);border-radius:12px;background:linear-gradient(140deg,#f0f9ff,#ffffff);display:flex;align-items:center;justify-content:center;color:#64748b;font-size:13px}
 
     /* Badge classe */
-    .badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;border:1px solid var(--border);padding:8px 12px;font-weight:700;font-size:14px}
+    .badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;border:1px solid var(--border);padding:8px 12px;font-weight:700;font-size:14px;width: 150px;justify-content: center;}
     .A{background:#ecfdf5;color:#065f46;border-color:#a7f3d0}
     .B{background:#f7fee7;color:#365314;border-color:#d9f99d}
     .C{background:#fffbeb;color:#92400e;border-color:#fde68a}
@@ -133,9 +133,8 @@
     <section id="sec-pue" class="section" aria-labelledby="pue-title">
       <div class="section-header">
         <div>
-          <div class="dot" style="background:var(--pue)"></div>
-          <h2 id="pue-title" class="title">PUE – Power Usage Effectiveness</h2>
-          <p class="desc">Efficienza energetica complessiva (minore è meglio).</p>
+          <h2 id="pue-title" class="title" style="color:var(--pue);">PUE – Power Usage Effectiveness</h2>
+          <p class="desc">Efficienza energetica complessiva.</p>
         </div>
         <span id="pue-badge" class="badge">Classe –</span>
       </div>
@@ -167,9 +166,8 @@
     <section id="sec-wue" class="section" aria-labelledby="wue-title">
       <div class="section-header">
         <div>
-          <div class="dot" style="background:var(--wue)"></div>
-          <h2 id="wue-title" class="title">WUE – Water Usage Effectiveness</h2>
-          <p class="desc">Consumo d'acqua per energia (m³/MWh, minore è meglio).</p>
+          <h2 id="wue-title" class="title" style="color:var(--wue);">WUE – Water Usage Effectiveness</h2>
+          <p class="desc">Consumo d'acqua per energia (m³/MWh).</p>
         </div>
         <span id="wue-badge" class="badge">Classe –</span>
       </div>
@@ -201,9 +199,8 @@
     <section id="sec-cue" class="section" aria-labelledby="cue-title">
       <div class="section-header">
         <div>
-          <div class="dot" style="background:var(--cue)"></div>
-          <h2 id="cue-title" class="title">CUE – Carbon Usage Effectiveness</h2>
-          <p class="desc">Emissioni per kWh IT (kgCO₂e/kWh IT, minore è meglio).</p>
+          <h2 id="cue-title" class="title" style="color:var(--cue);">CUE – Carbon Usage Effectiveness</h2>
+          <p class="desc">Emissioni per kWh IT (kgCO₂e/kWh IT).</p>
         </div>
         <span id="cue-badge" class="badge">Classe –</span>
       </div>
@@ -235,9 +232,8 @@
     <section id="sec-sci" class="section" aria-labelledby="sci-title">
       <div class="section-header">
         <div>
-          <div class="dot" style="background:var(--sci)"></div>
-          <h2 id="sci-title" class="title">SCI – Software Carbon Intensity</h2>
-          <p class="desc">Emissioni per richiesta API (gCO₂e per richiesta, minore è meglio).</p>
+          <h2 id="sci-title" class="title" style="color:var(--sci);">SCI – Software Carbon Intensity</h2>
+          <p class="desc">Emissioni per richiesta API (gCO₂e per richiesta).</p>
         </div>
         <span id="sci-badge" class="badge">Classe –</span>
       </div>
@@ -283,7 +279,7 @@
           <tbody></tbody>
         </table>
       </div>
-      <p class="note">Politica (mock): allarme se <b>valore &gt; soglia</b> (per indicatori dove "minore è meglio"). "Attenzione" entro il 5% dalla soglia.</p>
+      <p class="note">Allarme se <b>valore &gt; soglia</b>. "Attenzione" entro il 5% dalla soglia.</p>
     </section>
   </div>
 
@@ -293,7 +289,7 @@
     // -----------------------------
     if (window['chartjs-plugin-annotation']) { Chart.register(window['chartjs-plugin-annotation']); }
     const VALUES = {
-      PUE: 1.32,      // minore è meglio
+      PUE: 1.32,      
       WUE: 0.78,      // m³/MWh
       CUE: 0.21,      // kgCO2e/kWh IT
       SCI: 12.5       // gCO2e per richiesta API
