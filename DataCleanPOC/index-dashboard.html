@@ -32,7 +32,7 @@
     .container{
       max-width: 1180px;
       margin: 0 auto;
-      padding: 205px 20px 32px 20px;
+      padding: 185px 10px 32px 10px;
     }
     
     h1{font-size:clamp(24px,3vw,34px);margin:0 0 6px 0}
@@ -41,12 +41,13 @@
 
     /* ====== HEADER ====== */
     header{
-      padding:16px 16px 14px;
+      padding: 0px 16px 0px;
       border-bottom:4px solid var(--acqua);
       background:#fff;
       position: fixed;
       width: 100%;
       z-index: 1;
+      height: 184px;
     }
     .header-wrap{
       display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:space-between;
@@ -75,7 +76,7 @@
     .subtitle{color:var(--muted); font-size:.95rem}
 
     /* Section */
-    .section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 20px 24px 20px;margin-top:22px;box-shadow:var(--shadow)}
+    .section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 10px 24px 10px;margin-top:22px;box-shadow:var(--shadow)}
     .section-header{display:flex;gap:16px;align-items:flex-start;justify-content:space-between}
     .dot{width:10px;height:10px;border-radius:999px;flex:0 0 auto;margin-top:10px}
     .title{font-weight:700;font-size:22px;margin:0}
@@ -113,6 +114,28 @@
     .warn{background:#fffbeb;color:#92400e;border-color:#fde68a}
     .alert{background:#fef2f2;color:#7f1d1d;border-color:#fecaca}
     .note{color:var(--muted);font-size:12px;margin-top:8px}
+
+    /* Emphasis styles for alarm rows */
+    .alarm-row { transition: background-color .2s ease, outline-color .2s ease; }
+    .alarm-row.warn { background: linear-gradient(90deg, rgba(245, 158, 11, 0.10), transparent 35%); box-shadow: inset 4px 0 0 0 var(--warn); }
+    .alarm-row.alert { background: linear-gradient(90deg, rgba(239, 68, 68, 0.10), transparent 35%); box-shadow: inset 4px 0 0 0 var(--bad); }
+    .alarm-row.warn td, .alarm-row.alert td { border-bottom-color: #e9ecef; }
+    .alarm-row:hover { background-color: rgba(2,6,23,0.02); }
+
+    /* Alarm toolbar & stronger emphasis */
+    .alarm-toolbar{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin:8px 0 6px; }
+    .chip-toggle{ border:1px solid var(--border); background:#fff; color:#0f172a; border-radius:999px; padding:6px 12px; font-weight:700; font-size:12px; cursor:pointer; box-shadow:0 2px 6px rgba(2,6,23,0.05); }
+    .chip-toggle.active{ background:#fee2e2; border-color:#fecaca; color:#991b1b; }
+    .legend{ display:flex; align-items:center; gap:10px; font-size:12px; color:var(--muted); }
+    .legend .dot{ margin-top:0; }
+    .dot-warn{ background: var(--warn); }
+    .dot-alert{ background: var(--bad); }
+
+    /* Make ALERT/WARN rows more obvious */
+    .alarm-row.warn{ background: linear-gradient(90deg, rgba(245,158,11,0.16), transparent 45%); box-shadow: inset 6px 0 0 0 var(--warn); }
+    .alarm-row.alert{ background: linear-gradient(90deg, rgba(239,68,68,0.20), transparent 45%); box-shadow: inset 6px 0 0 0 var(--bad); }
+    .alarm-row.warn td{ color:#7c2d12; font-weight:600; }
+    .alarm-row.alert td{ color:#7f1d1d; font-weight:700; }
 
     .hint{font-size:12px;color:var(--muted)}
 
@@ -319,7 +342,13 @@
     <!-- Pannello Allarmi -->
     <section class="alarms" aria-labelledby="alarms-title">
       <h2 id="alarms-title" style="margin:0 0 6px 0">Allarmi & Realtime</h2>
-      <div class="hint">*Valori e soglie mock – personalizzare per il certificato realtime*</div>
+      <div class="alarm-toolbar">
+        <button id="btnFilterCritical" class="chip-toggle" aria-pressed="false">Mostra solo criticità</button>
+        <div class="legend">
+          <span class="dot dot-alert"></span> Allarme
+          <span class="dot dot-warn"></span> Attenzione
+        </div>
+      </div>
       <div style="overflow:auto;margin-top:10px">
         <table id="alarm-table" aria-describedby="alarms-title">
           <thead>
@@ -410,6 +439,7 @@
       else if (Math.abs(delta) <= th * 0.05) { state = 'warn'; note = 'Vicino alla soglia: valuta azioni correttive.'; }
 
       const tr = document.createElement('tr');
+      tr.className = `alarm-row ${state}`;
       tr.innerHTML = `
         <td>${r.label}</td>
         <td>${v}</td>
@@ -427,6 +457,23 @@
     if (badgeEl){
       badgeEl.textContent = String(totalNotif);
       badgeEl.style.display = totalNotif > 0 ? 'inline-flex' : 'none';
+    }
+
+    // Filtro: mostra solo criticità (warn + alert)
+    const btnFilter = document.getElementById('btnFilterCritical');
+    if (btnFilter){
+      let onlyCritical = false;
+      const applyFilter = () => {
+        document.querySelectorAll('#alarm-table tbody tr.alarm-row').forEach(tr => {
+          const isCritical = tr.classList.contains('warn') || tr.classList.contains('alert');
+          tr.style.display = (onlyCritical && !isCritical) ? 'none' : '';
+        });
+        btnFilter.classList.toggle('active', onlyCritical);
+        btnFilter.setAttribute('aria-pressed', String(onlyCritical));
+        btnFilter.textContent = onlyCritical ? 'Mostra tutti' : 'Mostra solo criticità';
+      };
+      btnFilter.addEventListener('click', () => { onlyCritical = !onlyCritical; applyFilter(); });
+      applyFilter();
     }
 
     // -----------------------------
