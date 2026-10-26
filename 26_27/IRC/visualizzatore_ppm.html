@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Visualizzatore PBM e PPM</title>
+  <style>
+    :root { font-family: Arial, sans-serif; color: #172033; background: #f4f7fb; }
+    body { margin: 0; padding: 24px; }
+    main { max-width: 1100px; margin: auto; background: white; padding: 28px; border-radius: 16px; box-shadow: 0 8px 28px #18315322; }
+    h1 { margin-top: 0; color: #133c6b; }
+    .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 18px; }
+    button, input::file-selector-button { background: #1565c0; color: white; border: 0; border-radius: 8px; padding: 9px 13px; cursor: pointer; }
+    button.secondary { background: #52657d; }
+    .layout { display: grid; grid-template-columns: minmax(340px, 1fr) minmax(300px, 0.8fr); gap: 24px; }
+    canvas { border: 1px solid #9aa8ba; background: white; image-rendering: pixelated; max-width: 100%; cursor: crosshair; }
+    textarea { width: 100%; min-height: 420px; box-sizing: border-box; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14px; line-height: 1.35; }
+    .info { margin: 12px 0; padding: 10px 12px; background: #eef5ff; border-left: 4px solid #1565c0; }
+    label { font-weight: 600; }
+    small { color: #52657d; }
+    @media (max-width: 780px) { .layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Visualizzatore e modificatore PBM/PPM</h1>
+  <p>Apri un file <strong>P1 PBM</strong> o <strong>P3 PPM</strong>. Il riquadro a sinistra mostra i pixel ingranditi, quello a destra mostra i numeri che li codificano.</p>
+  <div class="controls">
+    <input id="fileInput" type="file" accept=".pbm,.ppm,.pnm,text/plain">
+    <label>Colore <input id="colorPicker" type="color" value="#0066ff"></label>
+    <label>Zoom <input id="zoom" type="range" min="20" max="80" value="48"></label>
+    <label><input id="grid" type="checkbox" checked> Mostra griglia</label>
+    <button id="applyText" class="secondary">Aggiorna dai numeri</button>
+    <button id="savePnm">Salva PBM/PPM</button>
+    <button id="savePng">Esporta PNG</button>
+  </div>
+  <div id="status" class="info">Apri uno dei file presenti nella cartella <strong>file_sorgente</strong>.</div>
+  <div class="layout">
+    <section>
+      <canvas id="canvas" width="384" height="384"></canvas>
+      <p><small>Fai clic su un pixel per modificarlo. Nei file PBM il clic alterna bianco e nero. Nei file PPM usa il selettore del colore.</small></p>
+    </section>
+    <section>
+      <textarea id="source" spellcheck="false" aria-label="Contenuto numerico del file"></textarea>
+    </section>
+  </div>
+</main>
+<script>
+  const canvas = document.querySelector('#canvas');
+  const ctx = canvas.getContext('2d');
+  const source = document.querySelector('#source');
+  const status = document.querySelector('#status');
+  const fileInput = document.querySelector('#fileInput');
+  const colorPicker = document.querySelector('#colorPicker');
+  const zoom = document.querySelector('#zoom');
+  const grid = document.querySelector('#grid');
+  let image = null;
+  let currentName = 'immagine.ppm';
+
+  function cleanTokens(text) {
+    return text.split(/\r?\n/).map(line => line.replace(/#.*/, '')).join(' ').trim().split(/\s+/);
+  }
+
+  function parsePnm(text) {
+    const t = cleanTokens(text);
+    const magic = t.shift();
+    if (!['P1', 'P3'].includes(magic)) throw new Error('Sono supportati soltanto P1 PBM e P3 PPM.');
+    const width = Number(t.shift()), height = Number(t.shift());
+    if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 || width > 128 || height > 128) throw new Error('Dimensioni non valide.');
+    const max = magic === 'P3' ? Number(t.shift()) : 1;
+    const needed = width * height * (magic === 'P3' ? 3 : 1);
+    if (t.length < needed) throw new Error(`Dati insufficienti: servono ${needed} valori.`);
+    const values = t.slice(0, needed).map(Number);
+    if (values.some(v => !Number.isFinite(v) || v < 0 || v > max)) throw new Error('Uno o più valori non rientrano nell’intervallo consentito.');
+    return { magic, width, height, max, values };
+  }
+
+  function rgbAt(index) {
+    if (image.magic === 'P1') {
+      const value = image.values[index] ? 0 : 255;
+      return [value, value, value];
+    }
+    const k = index * 3;
+    return image.values.slice(k, k + 3).map(v => Math.round(v * 255 / image.max));
+  }
+
+  function render() {
+    if (!image) return;
+    const cell = Number(zoom.value);
+    canvas.width = image.width * cell;
+    canvas.height = image.height * cell;
+    ctx.imageSmoothingEnabled = false;
+    for (let y = 0; y < image.height; y++) for (let x = 0; x < image.width; x++) {
+      const [r, g, b] = rgbAt(y * image.width + x);
+      ctx.fillStyle = `rgb(${r},${g},${b})`;
+      ctx.fillRect(x * cell, y * cell, cell, cell);
+      if (grid.checked) {
+        ctx.strokeStyle = '#6f7f91'; ctx.lineWidth = 1;
+        ctx.strokeRect(x * cell + .5, y * cell + .5, cell - 1, cell - 1);
+      }
+    }
+    status.textContent = `${currentName}: ${image.width} × ${image.height} pixel, formato ${image.magic}`;
+  }
+
+  function serialize() {
+    if (!image) return '';
+    const lines = [image.magic, `# File modificato con visualizzatore_ppm.html`, `${image.width} ${image.height}`];
+    if (image.magic === 'P3') lines.push(String(image.max));
+    const stride = image.width * (image.magic === 'P3' ? 3 : 1);
+    for (let y = 0; y < image.height; y++) lines.push(image.values.slice(y * stride, (y + 1) * stride).join(' '));
+    return lines.join('\n') + '\n';
+  }
+
+  function syncText() { source.value = serialize(); render(); }
+
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files[0]; if (!file) return;
+    try { currentName = file.name; source.value = await file.text(); image = parsePnm(source.value); render(); }
+    catch (e) { status.textContent = `Errore: ${e.message}`; }
+  });
+
+  document.querySelector('#applyText').addEventListener('click', () => {
+    try { image = parsePnm(source.value); render(); }
+    catch (e) { status.textContent = `Errore: ${e.message}`; }
+  });
+
+  canvas.addEventListener('click', event => {
+    if (!image) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor((event.clientX - rect.left) * canvas.width / rect.width / Number(zoom.value));
+    const y = Math.floor((event.clientY - rect.top) * canvas.height / rect.height / Number(zoom.value));
+    if (x < 0 || y < 0 || x >= image.width || y >= image.height) return;
+    const index = y * image.width + x;
+    if (image.magic === 'P1') image.values[index] = image.values[index] ? 0 : 1;
+    else {
+      const rgb = colorPicker.value.match(/[a-f0-9]{2}/gi).map(h => parseInt(h, 16));
+      const k = index * 3;
+      image.values[k] = Math.round(rgb[0] * image.max / 255);
+      image.values[k + 1] = Math.round(rgb[1] * image.max / 255);
+      image.values[k + 2] = Math.round(rgb[2] * image.max / 255);
+    }
+    syncText();
+    status.textContent += `, ultimo pixel modificato: riga ${y + 1}, colonna ${x + 1}`;
+  });
+
+  function download(blob, name) {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 500);
+  }
+
+  document.querySelector('#savePnm').addEventListener('click', () => {
+    if (!image) return;
+    const ext = image.magic === 'P1' ? '.pbm' : '.ppm';
+    download(new Blob([serialize()], {type: 'text/plain'}), currentName.replace(/\.(pbm|ppm|pnm)$/i, '') + '_modificata' + ext);
+  });
+  document.querySelector('#savePng').addEventListener('click', () => {
+    if (!image) return;
+    const raw = document.createElement('canvas'); raw.width = image.width; raw.height = image.height;
+    const rawCtx = raw.getContext('2d'); const data = rawCtx.createImageData(image.width, image.height);
+    for (let i = 0; i < image.width * image.height; i++) {
+      const [r,g,b] = rgbAt(i); data.data.set([r,g,b,255], i * 4);
+    }
+    rawCtx.putImageData(data, 0, 0);
+    raw.toBlob(blob => download(blob, currentName.replace(/\.(pbm|ppm|pnm)$/i, '') + '.png'));
+  });
+  zoom.addEventListener('input', render); grid.addEventListener('change', render);
+</script>
+</body>
+</html>
