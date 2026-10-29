@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalogo>
+  <prodotto id="P001">
+    <nome>Notebook</nome>
+    <categoria>Informatica</categoria>
+    <prezzo>799.90</prezzo>
+    <disponibile>true</disponibile>
+  </prodotto>
+  <prodotto id="P002">
+    <nome>Monitor 24 pollici</nome>
+    <categoria>Periferiche</categoria>
+    <prezzo>149.99</prezzo>
+    <disponibile>true</disponibile>
+  </prodotto>
+  <prodotto id="P003">
+    <nome>Tastiera meccanica</nome>
+    <categoria>Periferiche</categoria>
+    <prezzo>69.50</prezzo>
+    <disponibile>false</disponibile>
+  </prodotto>
+</catalogo>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parser XML con JavaScript</title>
+  <style>
+    body {
+      margin: 0;
+      background: #f4f7fb;
+      color: #172033;
+      font-family: Arial, sans-serif;
+    }
+
+    main {
+      width: min(900px, calc(100% - 40px));
+      margin: 50px auto;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+    }
+
+    .descrizione {
+      margin-top: 0;
+      color: #536078;
+    }
+
+    button {
+      margin: 18px 0;
+      padding: 11px 18px;
+      border: 0;
+      border-radius: 8px;
+      background: #155eef;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #004ee1;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 8px 28px rgba(23, 32, 51, 0.08);
+    }
+
+    th, td {
+      padding: 13px 15px;
+      border-bottom: 1px solid #dde3ec;
+      text-align: left;
+    }
+
+    th {
+      background: #172033;
+      color: white;
+    }
+
+    .si {
+      color: #087a45;
+      font-weight: bold;
+    }
+
+    .no {
+      color: #b42318;
+      font-weight: bold;
+    }
+
+    .errore {
+      padding: 14px;
+      border-left: 5px solid #b42318;
+      background: #fee4e2;
+      color: #7a271a;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Catalogo prodotti</h1>
+    <p class="descrizione">
+      I dati vengono caricati dal file <strong>catalogo.xml</strong>, analizzati
+      con <strong>DOMParser</strong> e inseriti nella pagina con <strong>innerHTML</strong>.
+    </p>
+
+    <button id="carica">Carica i prodotti</button>
+
+    <div id="risultato">
+      <p>Premi il pulsante per leggere il file XML.</p>
+    </div>
+  </main>
+
+  <script>
+    const pulsante = document.querySelector("#carica");
+    const risultato = document.querySelector("#risultato");
+
+    pulsante.addEventListener("click", caricaCatalogo);
+
+    async function caricaCatalogo() {
+      try {
+        // 1. Recuperiamo il contenuto del file XML.
+        const risposta = await fetch("catalogo.xml");
+
+        if (!risposta.ok) {
+          throw new Error(`Errore HTTP: ${risposta.status}`);
+        }
+
+        // 2. Convertiamo la risposta in una normale stringa.
+        const testoXml = await risposta.text();
+
+        // 3. DOMParser trasforma la stringa in un documento XML navigabile.
+        const parser = new DOMParser();
+        const documentoXml = parser.parseFromString(testoXml, "application/xml");
+
+        // Un XML non valido produce un elemento <parsererror>.
+        if (documentoXml.querySelector("parsererror")) {
+          throw new Error("Il documento XML non è valido.");
+        }
+
+        // 4. Selezioniamo tutti gli elementi <prodotto>.
+        const prodotti = documentoXml.querySelectorAll("prodotto");
+
+        // 5. Costruiamo le righe HTML leggendo elementi e attributi dell'XML.
+        let righe = "";
+
+        prodotti.forEach((prodotto) => {
+          const id = prodotto.getAttribute("id");
+          const nome = prodotto.querySelector("nome").textContent;
+          const categoria = prodotto.querySelector("categoria").textContent;
+          const prezzo = Number(prodotto.querySelector("prezzo").textContent);
+          const disponibile = prodotto.querySelector("disponibile").textContent === "true";
+
+          righe += `
+            <tr>
+              <td>${id}</td>
+              <td>${nome}</td>
+              <td>${categoria}</td>
+              <td>${prezzo.toFixed(2)} &euro;</td>
+              <td class="${disponibile ? "si" : "no"}">
+                ${disponibile ? "Sì" : "No"}
+              </td>
+            </tr>
+          `;
+        });
+
+        // 6. Inseriamo la tabella completa dentro il div #risultato.
+        risultato.innerHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Prodotto</th>
+                <th>Categoria</th>
+                <th>Prezzo</th>
+                <th>Disponibile</th>
+              </tr>
+            </thead>
+            <tbody>${righe}</tbody>
+          </table>
+        `;
+      } catch (errore) {
+        risultato.innerHTML = `<p class="errore">${errore.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
